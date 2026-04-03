@@ -66,3 +66,37 @@ The lexer (tokenizer) operates at Type 3 — it's essentially a finite automaton
 #### Operator Precedence via Stratified Grammars
 
 In formal terms, precedence is encoded by **stratifying the grammar into levels**. Each level of production rules corresponds to a precedence level. This is a standard technique in compiler theory — straight out of the "Dragon Book" (Aho, Sethi, Ullman).
+
+## Part 7 — Abstract Syntax Trees and the Separation of Syntax from Semantics
+
+The interpreter is now split into a **parser** (builds a tree) and an **interpreter** (walks the tree). The pipeline matches the classic compiler architecture:
+
+```
+Frontend (Lexer + Parser) → IR (AST) → Backend (Interpreter)
+```
+
+### Abstract Syntax Trees (ASTs)
+
+In formal language theory, a **parse tree** (or derivation tree) represents how a string is derived from a grammar. An AST is a simplified version — it drops the grammar noise (parentheses, keywords) and keeps only the meaningful structure. For `(2 + 3) * 4`:
+
+```
+    *
+   / \
+  +   4
+ / \
+2   3
+```
+
+The parentheses are gone — the tree structure itself encodes the precedence.
+
+### Intermediate Representations (IR)
+
+This is a core concept from **compiler theory**. The AST is our first **intermediate representation** — a data structure that sits between the source code and the result. Real compilers often have multiple IRs, each transforming the program further.
+
+### Tree Traversal and Tree Automata
+
+The way the interpreter walks the tree (`visit_BinOp` calls `visit` on left and right children) is a **post-order tree traversal** — children are evaluated before the parent. This connects to **tree automata** in theoretical CS, which formalize how to process tree-structured data.
+
+### Separation of Syntax and Semantics
+
+This is a fundamental distinction in formal language theory. The **parser** handles syntax (is the expression well-formed?), while the **interpreter** handles semantics (what does it mean?). By separating them, we could attach different semantics to the same syntax — a type checker, a compiler, a pretty-printer — all just different visitors walking the same tree.

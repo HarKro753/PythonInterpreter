@@ -1,12 +1,14 @@
 import sys
 from lexer import Lexer
+from parser import Parser
 from interpreter import Interpreter
 
 
 def run(text):
     lexer = Lexer(text)
-    interpreter = Interpreter(lexer)
-    result = interpreter.expr()
+    parser = Parser(lexer)
+    interpreter = Interpreter(parser)
+    result = interpreter.interpret()
     print(result)
 
 
