@@ -1,4 +1,4 @@
-from tokens import INTEGER, PLUS, MINUS
+from tokens import INTEGER, PLUS, MINUS, MUL, DIV
 from lexer import Lexer
 
 
@@ -16,12 +16,29 @@ class Interpreter(object):
         else:
             self.error()
 
-    def term(self):
+    def factor(self):
+        """factor : INTEGER"""
         token = self.current_token
         self.eat(INTEGER)
         return token.value
 
+    def term(self):
+        """term : factor ((MUL | DIV) factor)*"""
+        result = self.factor()
+
+        while self.current_token.type in (MUL, DIV):
+            token = self.current_token
+            if token.type == MUL:
+                self.eat(MUL)
+                result = result * self.factor()
+            elif token.type == DIV:
+                self.eat(DIV)
+                result = result // self.factor()
+
+        return result
+
     def expr(self):
+        """expr : term ((PLUS | MINUS) term)*"""
         result = self.term()
 
         while self.current_token.type in (PLUS, MINUS):

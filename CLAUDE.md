@@ -3,19 +3,13 @@
 Building a simple Pascal interpreter from scratch in Python, following Ruslan Spivak's
 "Let's Build A Simple Interpreter" (LSBASI) tutorial series.
 
-## Current Progress
-
-- Part 1: Complete
-- Part 2: Complete
-- Part 3: Complete
-
 ## Tutorial Parts
 
 - Part 1: https://ruslanspivak.com/lsbasi-part1/ — Single-digit addition, lexer basics (INTEGER, PLUS, EOF tokens)
 - Part 2: https://ruslanspivak.com/lsbasi-part2/ — Multi-digit integers, subtraction, whitespace handling
 - Part 3: https://ruslanspivak.com/lsbasi-part3/ — Syntax diagrams, arbitrary-length addition/subtraction expressions
 - Part 4: https://ruslanspivak.com/lsbasi-part4/ — Context-free grammars (BNF), multiplication and division
-- Part 5: https://ruslanspivak.com/lsbasi-part5/ — Operator associativity and precedence (+, -, *, / together)
+- Part 5: https://ruslanspivak.com/lsbasi-part5/ — Operator associativity and precedence (+, -, \*, / together)
 - Part 6: https://ruslanspivak.com/lsbasi-part6/ — Parenthesized expressions with arbitrary nesting
 - Part 7: https://ruslanspivak.com/lsbasi-part7/ — Abstract Syntax Trees (ASTs), separate parser and tree-walking evaluator
 - Part 8: https://ruslanspivak.com/lsbasi-part8/ — Unary plus and minus operators

@@ -74,7 +74,7 @@ python3 src/main.py
 - [x] Part 1 — Single-digit addition
 - [x] Part 2 — Multi-digit integers, subtraction, whitespace
 - [x] Part 3 — Syntax diagrams, arbitrary-length +/- expressions
-- [ ] Part 4 — Context-free grammars, multiplication and division
+- [x] Part 4 — Context-free grammars, multiplication and division
 - [ ] Part 5 — Operator precedence and associativity
 - [ ] Part 6 — Parenthesized expressions
 - [ ] Part 7 — Abstract Syntax Trees (ASTs)
