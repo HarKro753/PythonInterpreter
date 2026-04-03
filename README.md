@@ -16,24 +16,25 @@
 
 This project follows Ruslan Spivak's ["Let's Build A Simple Interpreter"](https://ruslanspivak.com/lsbasi-part1/) tutorial series to build a Pascal interpreter from scratch in Python. The goal is to understand how interpreters and compilers work — from tokenizing raw text, to parsing grammar rules, to evaluating results.
 
-**Currently implemented (Part 1):**
-- Lexer that tokenizes input into `INTEGER`, `PLUS`, and `EOF` tokens
-- Parser that validates the `INTEGER + INTEGER` grammar
+**Currently implemented (Parts 1–3):**
+- Lexer that tokenizes input into `INTEGER`, `PLUS`, `MINUS`, and `EOF` tokens
+- Parser that handles arbitrary-length addition and subtraction expressions
 - Evaluator that computes the result
+- Multi-digit integers and whitespace handling
 
 ## 🚀 Usage
 
 ### Interactive Mode
 
 ```sh
-python3 interpreter.py
+python3 src/main.py
 ```
 
 ```
-calc> 3+5
-8
-calc> 1+2
-3
+calc> 21 + 12 + 23
+56
+calc> 100 - 50 - 25
+25
 ```
 
 ### File Mode
@@ -41,20 +42,20 @@ calc> 1+2
 Create a `.calc` file with one expression per line:
 
 ```
-3+5
-1+2
-7+8
+21 + 12 + 23
+100 - 50 - 25
+7 - 3 + 2 - 1 + 10
 ```
 
 Run it:
 
 ```sh
-python3 interpreter.py examples/section1.calc
+python3 src/main.py examples/section3.calc
 ```
 
 ```
-8
-3
+56
+25
 15
 ```
 
@@ -65,14 +66,14 @@ Requires **Python 3.6+**. No dependencies.
 ```sh
 git clone https://github.com/harrokrog/PythonInterpreter.git
 cd PythonInterpreter
-python3 interpreter.py
+python3 src/main.py
 ```
 
 ## 🗺️ Roadmap
 
 - [x] Part 1 — Single-digit addition
 - [x] Part 2 — Multi-digit integers, subtraction, whitespace
-- [ ] Part 3 — Syntax diagrams, arbitrary-length +/- expressions
+- [x] Part 3 — Syntax diagrams, arbitrary-length +/- expressions
 - [ ] Part 4 — Context-free grammars, multiplication and division
 - [ ] Part 5 — Operator precedence and associativity
 - [ ] Part 6 — Parenthesized expressions
