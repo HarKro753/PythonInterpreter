@@ -15,19 +15,11 @@ def run(text):
 def main():
     if len(sys.argv) > 1:
         with open(sys.argv[1]) as f:
-            for line in f:
-                line = line.strip()
-                if line:
-                    run(line)
+            text = f.read()
+        run(text)
     else:
-        while True:
-            try:
-                text = input('calc> ')
-            except EOFError:
-                break
-            if not text:
-                continue
-            run(text)
+        print('Usage: python3 src/main.py <filename>')
+        print('Example: python3 src/main.py examples/section9.pas')
 
 
 if __name__ == '__main__':

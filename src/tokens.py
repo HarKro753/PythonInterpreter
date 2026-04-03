@@ -2,6 +2,14 @@
 INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN, EOF = (
     'INTEGER', 'PLUS', 'MINUS', 'MUL', 'DIV', 'LPAREN', 'RPAREN', 'EOF'
 )
+BEGIN, END, DOT, ASSIGN, SEMI, ID = (
+    'BEGIN', 'END', 'DOT', 'ASSIGN', 'SEMI', 'ID'
+)
+
+RESERVED_KEYWORDS = {
+    'BEGIN': 'BEGIN',
+    'END': 'END',
+}
 
 
 class Token(object):

@@ -1,4 +1,7 @@
-from tokens import Token, INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN, EOF
+from tokens import (
+    Token, INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN,
+    EOF, BEGIN, END, DOT, ASSIGN, SEMI, ID, RESERVED_KEYWORDS
+)
 
 
 class Lexer(object):
@@ -17,6 +20,12 @@ class Lexer(object):
         else:
             self.current_char = self.text[self.pos]
 
+    def peek(self):
+        peek_pos = self.pos + 1
+        if peek_pos > len(self.text) - 1:
+            return None
+        return self.text[peek_pos]
+
     def skip_whitespace(self):
         while self.current_char is not None and self.current_char.isspace():
             self.advance()
@@ -28,6 +37,15 @@ class Lexer(object):
             self.advance()
         return int(result)
 
+    def _id(self):
+        result = ''
+        while self.current_char is not None and self.current_char.isalnum():
+            result += self.current_char
+            self.advance()
+
+        token_type = RESERVED_KEYWORDS.get(result, ID)
+        return Token(token_type, result)
+
     def get_next_token(self):
         while self.current_char is not None:
 
@@ -35,8 +53,24 @@ class Lexer(object):
                 self.skip_whitespace()
                 continue
 
+            if self.current_char.isalpha():
+                return self._id()
+
             if self.current_char.isdigit():
                 return Token(INTEGER, self.integer())
+
+            if self.current_char == ':' and self.peek() == '=':
+                self.advance()
+                self.advance()
+                return Token(ASSIGN, ':=')
+
+            if self.current_char == ';':
+                self.advance()
+                return Token(SEMI, ';')
+
+            if self.current_char == '.':
+                self.advance()
+                return Token(DOT, '.')
 
             if self.current_char == '+':
                 self.advance()

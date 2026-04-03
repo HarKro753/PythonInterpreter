@@ -136,3 +136,83 @@ Interpreter:
 This is the **visitor pattern** — instead of using `if/elif` to check node types, it uses Python's `getattr()` to dispatch automatically. The benefit: when we add a new node type, we just add a `visit_NewType` method and it works. No need to touch `visit()` itself.
 
 This relates to **dynamic dispatch** and the **open/closed principle** — the system is open for extension (new node types) but closed for modification (the `visit()` method never changes).
+
+## Part 9 — From Calculator to Programming Language
+
+This is the biggest leap in the series. We went from a stateless expression evaluator to an imperative language with variables, assignment, and compound statements. The interpreter now has **memory**.
+
+### The Symbol Table (GLOBAL_SCOPE)
+
+The `GLOBAL_SCOPE` dictionary is our first **symbol table** — the data structure every compiler and interpreter uses to track what names mean. Right now it maps variable names to integer values. In later parts it'll track types, scopes, and procedures.
+
+In formal terms, this is an **environment** in the operational semantics sense — a mapping from identifiers to values: `Env : Name → Value`.
+
+### From Expressions to Statements — State Transitions
+
+Up to Part 8, our language was purely **functional**: input goes in, a value comes out, no side effects. Now we have **statements** that modify state.
+
+Each statement is a **state transition** — it reads from the store, computes, and writes back. This is the core of **denotational semantics**, where a program's meaning is defined as a function from states to states:
+
+```
+Statement : State → State
+```
+
+For example, `x := 2 + 3` transforms `{} → {x: 5}`. Then `y := x + 1` transforms `{x: 5} → {x: 5, y: 6}`. The program is a composition of these state transitions.
+
+### Sequential Composition and Structured Programming
+
+`BEGIN...END` blocks give us **sequential composition** — executing statements in order. In formal semantics this is written as `S1; S2` and means "execute S1, then in the resulting state, execute S2."
+
+This is one of the fundamental constructs in **Hoare logic**, where we reason about programs using preconditions and postconditions:
+
+```
+{P} S1 {Q},  {Q} S2 {R}
+─────────────────────────
+    {P} S1; S2 {R}
+```
+
+Nested `BEGIN...END` blocks also give us **block structure** — a key concept from **structured programming** (Dijkstra, 1968).
+
+### Reserved Words vs Identifiers
+
+The `_id()` method in the lexer reads a word, then checks if it's a keyword (`BEGIN`, `END`) or a variable name. This is a classic lexer problem — the lexer must resolve this ambiguity before the parser ever sees the token. This is why most languages forbid using keywords as variable names.
+
+This connects to the concept of **maximal munch** in lexical analysis — the lexer always consumes the longest possible match. When it reads `B`, `E`, `G`, `I`, `N`, it doesn't stop at `B` — it keeps going until the word ends, then looks it up.
+
+### Predictive Parsing and LL(1)
+
+The `statement()` method checks the current token to decide which rule to apply:
+
+```
+BEGIN → compound_statement
+ID    → assignment_statement
+else  → empty
+```
+
+This is **LL(1) parsing** — we decide which production to use by looking at just **one token** ahead. The "LL" means Left-to-right scan, Leftmost derivation. The "1" means one token of lookahead.
+
+The `peek()` method in the lexer is related — it gives us one character of lookahead to distinguish `:` from `:=` (a two-character token). This is lookahead at the **lexical level**, while `statement()` uses lookahead at the **syntactic level**.
+
+### Walkthrough: A Complete Program
+
+```pascal
+BEGIN
+    x := 2;
+    y := x + 3
+END.
+```
+
+```
+State: {}
+├─ visit_Compound → visits each child statement
+│   ├─ visit_Assign(x := 2)
+│   │   ├─ visit_Num(2) → returns 2
+│   │   └─ GLOBAL_SCOPE["x"] = 2           State: {x: 2}
+│   ├─ visit_Assign(y := x + 3)
+│   │   ├─ visit_BinOp(x + 3)
+│   │   │   ├─ visit_Var(x) → looks up "x" → returns 2
+│   │   │   └─ visit_Num(3) → returns 3
+│   │   │   └─ returns 2 + 3 = 5
+│   │   └─ GLOBAL_SCOPE["y"] = 5           State: {x: 2, y: 5}
+└─ returns {x: 2, y: 5}
+```

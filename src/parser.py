@@ -1,5 +1,8 @@
-from tokens import INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN
-from ast_nodes import BinOp, UnaryOp, Num
+from tokens import (
+    INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN,
+    EOF, BEGIN, END, DOT, ASSIGN, SEMI, ID
+)
+from ast_nodes import BinOp, UnaryOp, Num, Compound, Assign, Var, NoOp
 
 
 class Parser(object):
@@ -16,8 +19,68 @@ class Parser(object):
         else:
             self.error()
 
+    def program(self):
+        """program : compound_statement DOT"""
+        node = self.compound_statement()
+        self.eat(DOT)
+        return node
+
+    def compound_statement(self):
+        """compound_statement : BEGIN statement_list END"""
+        self.eat(BEGIN)
+        nodes = self.statement_list()
+        self.eat(END)
+
+        root = Compound()
+        for node in nodes:
+            root.children.append(node)
+
+        return root
+
+    def statement_list(self):
+        """statement_list : statement | statement SEMI statement_list"""
+        node = self.statement()
+        results = [node]
+
+        while self.current_token.type == SEMI:
+            self.eat(SEMI)
+            results.append(self.statement())
+
+        if self.current_token.type == ID:
+            self.error()
+
+        return results
+
+    def statement(self):
+        """statement : compound_statement | assignment_statement | empty"""
+        if self.current_token.type == BEGIN:
+            node = self.compound_statement()
+        elif self.current_token.type == ID:
+            node = self.assignment_statement()
+        else:
+            node = self.empty()
+        return node
+
+    def assignment_statement(self):
+        """assignment_statement : variable ASSIGN expr"""
+        left = self.variable()
+        token = self.current_token
+        self.eat(ASSIGN)
+        right = self.expr()
+        return Assign(left, token, right)
+
+    def variable(self):
+        """variable : ID"""
+        node = Var(self.current_token)
+        self.eat(ID)
+        return node
+
+    def empty(self):
+        """An empty production"""
+        return NoOp()
+
     def factor(self):
-        """factor : (PLUS | MINUS) factor | INTEGER | LPAREN expr RPAREN"""
+        """factor : PLUS factor | MINUS factor | INTEGER | LPAREN expr RPAREN | variable"""
         token = self.current_token
         if token.type == PLUS:
             self.eat(PLUS)
@@ -33,6 +96,8 @@ class Parser(object):
             node = self.expr()
             self.eat(RPAREN)
             return node
+        else:
+            return self.variable()
 
     def term(self):
         """term : factor ((MUL | DIV) factor)*"""
@@ -63,4 +128,7 @@ class Parser(object):
         return node
 
     def parse(self):
-        return self.expr()
+        node = self.program()
+        if self.current_token.type != EOF:
+            self.error()
+        return node
