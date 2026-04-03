@@ -1,114 +1,29 @@
-<a id="readme-top"></a>
+# 📄 PythonInterpreter
 
-<!-- PROJECT SHIELDS -->
+> _A simple interpreter built from scratch in Python, learning how programming languages work under the hood._
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <h1>Python Interpreter</h1>
+## 🌟 Highlights
 
-  <p align="center">
-    A simple interpreter built from scratch in Python, following Ruslan Spivak's "Let's Build A Simple Interpreter" series.
-    <br />
-    <a href="https://ruslanspivak.com/lsbasi-part1/"><strong>Follow the tutorial »</strong></a>
-    <br />
-    <br />
-    <a href="#usage">View Demo</a>
-    &middot;
-    <a href="https://github.com/harrokrog/PythonInterpreter/issues">Report Bug</a>
-    &middot;
-    <a href="https://github.com/harrokrog/PythonInterpreter/issues">Request Feature</a>
-  </p>
-</div>
+- Hand-built lexer, parser, and evaluator — no external dependencies
+- Interactive REPL mode (`calc>` prompt)
+- Custom `.calc` file format support
+- Following the full 18-part [LSBASI tutorial series](https://ruslanspivak.com/lsbasi-part1/)
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
+## ℹ️ Overview
 
-<!-- ABOUT THE PROJECT -->
-
-## About The Project
-
-This project is a hand-built interpreter written in Python. It follows the ["Let's Build A Simple Interpreter"](https://ruslanspivak.com/lsbasi-part1/) tutorial series by Ruslan Spivak to understand how programming languages and interpreters work under the hood.
+This project follows Ruslan Spivak's ["Let's Build A Simple Interpreter"](https://ruslanspivak.com/lsbasi-part1/) tutorial series to build a Pascal interpreter from scratch in Python. The goal is to understand how interpreters and compilers work — from tokenizing raw text, to parsing grammar rules, to evaluating results.
 
 **Currently implemented (Part 1):**
-
 - Lexer that tokenizes input into `INTEGER`, `PLUS`, and `EOF` tokens
 - Parser that validates the `INTEGER + INTEGER` grammar
 - Evaluator that computes the result
-- Support for running `.calc` files as a custom file format
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-### Built With
-
-[![Python][Python-shield]][Python-url]
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- GETTING STARTED -->
-
-## Getting Started
-
-To get a local copy up and running, follow these steps.
-
-### Prerequisites
-
-- Python 3.6 or higher
-  ```sh
-  python3 --version
-  ```
-
-### Installation
-
-1. Clone the repo
-   ```sh
-   git clone https://github.com/harrokrog/PythonInterpreter.git
-   ```
-2. Navigate to the project directory
-   ```sh
-   cd PythonInterpreter
-   ```
-
-That's it — no dependencies required.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- USAGE -->
-
-## Usage
+## 🚀 Usage
 
 ### Interactive Mode
-
-Launch the interpreter in interactive (REPL) mode:
 
 ```sh
 python3 interpreter.py
@@ -134,7 +49,7 @@ Create a `.calc` file with one expression per line:
 Run it:
 
 ```sh
-python3 interpreter.py examplse/section1.calc
+python3 interpreter.py examples/section1.calc
 ```
 
 ```
@@ -143,11 +58,17 @@ python3 interpreter.py examplse/section1.calc
 15
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## ⬇️ Installation
 
-<!-- ROADMAP -->
+Requires **Python 3.6+**. No dependencies.
 
-## Roadmap
+```sh
+git clone https://github.com/harrokrog/PythonInterpreter.git
+cd PythonInterpreter
+python3 interpreter.py
+```
+
+## 🗺️ Roadmap
 
 - [x] Part 1 — Single-digit addition
 - [ ] Part 2 — Multi-digit integers, subtraction, whitespace
@@ -168,61 +89,11 @@ python3 interpreter.py examplse/section1.calc
 - [ ] Part 17 — Call stack and activation records
 - [ ] Part 18 — Executing procedure calls
 
-See the [tutorial series](https://ruslanspivak.com/lsbasi-part1/) for the full plan.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- CONTRIBUTING -->
-
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- LICENSE -->
-
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- CONTACT -->
-
-## Contact
-
-Project Link: [https://github.com/harrokrog/PythonInterpreter](https://github.com/harrokrog/PythonInterpreter)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- ACKNOWLEDGMENTS -->
-
-## Acknowledgments
+## 📖 Further Reading
 
 - [Let's Build A Simple Interpreter — Ruslan Spivak](https://ruslanspivak.com/lsbasi-part1/)
-- [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
-- [Shields.io](https://shields.io)
+- [banesullivan/README — README guide](https://github.com/banesullivan/README)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## 📄 License
 
-<!-- MARKDOWN LINKS & IMAGES -->
-
-[contributors-shield]: https://img.shields.io/github/contributors/harrokrog/PythonInterpreter.svg?style=for-the-badge
-[contributors-url]: https://github.com/harrokrog/PythonInterpreter/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/harrokrog/PythonInterpreter.svg?style=for-the-badge
-[forks-url]: https://github.com/harrokrog/PythonInterpreter/network/members
-[stars-shield]: https://img.shields.io/github/stars/harrokrog/PythonInterpreter.svg?style=for-the-badge
-[stars-url]: https://github.com/harrokrog/PythonInterpreter/stargazers
-[issues-shield]: https://img.shields.io/github/issues/harrokrog/PythonInterpreter.svg?style=for-the-badge
-[issues-url]: https://github.com/harrokrog/PythonInterpreter/issues
-[license-shield]: https://img.shields.io/github/license/harrokrog/PythonInterpreter.svg?style=for-the-badge
-[license-url]: https://github.com/harrokrog/PythonInterpreter/blob/main/LICENSE
-[Python-shield]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
-[Python-url]: https://python.org
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for details.
