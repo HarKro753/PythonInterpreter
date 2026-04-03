@@ -1,10 +1,10 @@
 from tokens import (
     INTEGER_CONST, REAL_CONST, PLUS, MINUS, MUL, FLOAT_DIV, INTEGER_DIV,
     LPAREN, RPAREN, EOF, BEGIN, END, DOT, ASSIGN, SEMI, ID,
-    PROGRAM, VAR, INTEGER, REAL, COLON, COMMA
+    PROGRAM, VAR, PROCEDURE, INTEGER, REAL, COLON, COMMA
 )
 from ast_nodes import (
-    Program, Block, VarDecl, Type, BinOp, UnaryOp, Num,
+    Program, Block, VarDecl, ProcedureDecl, Type, BinOp, UnaryOp, Num,
     Compound, Assign, Var, NoOp
 )
 
@@ -40,14 +40,29 @@ class Parser(object):
         return Block(declaration_nodes, compound_statement_node)
 
     def declarations(self):
-        """declarations : VAR (variable_declaration SEMI)+ | empty"""
+        """declarations : VAR (variable_declaration SEMI)+
+                        | (PROCEDURE ID SEMI block SEMI)*
+                        | empty
+        """
         declarations = []
+
         if self.current_token.type == VAR:
             self.eat(VAR)
             while self.current_token.type == ID:
                 var_decl = self.variable_declaration()
                 declarations.extend(var_decl)
                 self.eat(SEMI)
+
+        while self.current_token.type == PROCEDURE:
+            self.eat(PROCEDURE)
+            proc_name = self.current_token.value
+            self.eat(ID)
+            self.eat(SEMI)
+            block_node = self.block()
+            proc_decl = ProcedureDecl(proc_name, block_node)
+            declarations.append(proc_decl)
+            self.eat(SEMI)
+
         return declarations
 
     def variable_declaration(self):

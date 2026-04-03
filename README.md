@@ -81,8 +81,8 @@ python3 src/main.py
 - [x] Part 8 — Unary operators
 - [x] Part 9 — Pascal compound statements, variables
 - [x] Part 10 — Complete Pascal programs
-- [ ] Part 11 — Symbol table management
-- [ ] Part 12 — Procedure declarations
+- [x] Part 11 — Symbol table management
+- [x] Part 12 — Procedure declarations
 - [ ] Part 13 — Semantic analysis
 - [ ] Part 14 — Nested scopes, source-to-source compiler
 - [ ] Part 15 — Improved error reporting

@@ -20,6 +20,12 @@ class VarDecl(AST):
         self.type_node = type_node
 
 
+class ProcedureDecl(AST):
+    def __init__(self, proc_name, block_node):
+        self.proc_name = proc_name
+        self.block_node = block_node
+
+
 class Type(AST):
     def __init__(self, token):
         self.token = token

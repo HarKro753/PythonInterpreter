@@ -12,8 +12,8 @@ class NodeVisitor(object):
 
 
 class Interpreter(NodeVisitor):
-    def __init__(self, parser):
-        self.parser = parser
+    def __init__(self, tree):
+        self.tree = tree
         self.GLOBAL_SCOPE = {}
 
     def visit_Program(self, node):
@@ -25,6 +25,9 @@ class Interpreter(NodeVisitor):
         self.visit(node.compound_statement)
 
     def visit_VarDecl(self, node):
+        pass
+
+    def visit_ProcedureDecl(self, node):
         pass
 
     def visit_Type(self, node):
@@ -70,6 +73,5 @@ class Interpreter(NodeVisitor):
         return val
 
     def interpret(self):
-        tree = self.parser.parse()
-        self.visit(tree)
+        self.visit(self.tree)
         return self.GLOBAL_SCOPE

@@ -1,13 +1,19 @@
 import sys
 from lexer import Lexer
 from parser import Parser
+from semantic_analyzer import SymbolTableBuilder
 from interpreter import Interpreter
 
 
 def run(text):
     lexer = Lexer(text)
     parser = Parser(lexer)
-    interpreter = Interpreter(parser)
+    tree = parser.parse()
+
+    symtab_builder = SymbolTableBuilder()
+    symtab_builder.visit(tree)
+
+    interpreter = Interpreter(tree)
     result = interpreter.interpret()
     print(result)
 
@@ -19,7 +25,7 @@ def main():
         run(text)
     else:
         print('Usage: python3 src/main.py <filename>')
-        print('Example: python3 src/main.py examples/section9.pas')
+        print('Example: python3 src/main.py examples/section10.pas')
 
 
 if __name__ == '__main__':
