@@ -216,3 +216,88 @@ State: {}
 │   │   └─ GLOBAL_SCOPE["y"] = 5           State: {x: 2, y: 5}
 └─ returns {x: 2, y: 5}
 ```
+
+## Part 13 — Static Analysis: Catching Errors Before Execution
+
+This part introduces the most important new theoretical concept since ASTs: **static semantic analysis**. The interpreter now has a phase that checks the program for errors *without running it*.
+
+### The Multi-Pass Architecture
+
+Our pipeline is now:
+
+```
+Source → Lexer → Parser → AST → Semantic Analyzer → Interpreter
+                                 ↑                    ↑
+                           Pass 1: check          Pass 2: execute
+```
+
+The AST is traversed **twice** by two different visitors. The semantic analyzer walks the tree first, checking for errors. Only if it passes does the interpreter walk the same tree to execute it. This is the same architecture used by real compilers — GCC, Clang, javac all have separate analysis passes before code generation.
+
+### Static vs Dynamic Analysis
+
+This is a fundamental distinction in computer science:
+
+- **Static analysis** — examining the program *without executing it*. Our `SemanticAnalyzer` does this. It reads declarations, builds a symbol table, and checks that every variable used is declared. All of this happens at "compile time" (before execution).
+- **Dynamic analysis** — checking things *during execution*. Our `Interpreter` does this. Division by zero, for example, can only be caught at runtime.
+
+In type theory, this maps to:
+- **Static type systems** (Java, C, Rust) — types checked before execution
+- **Dynamic type systems** (Python, JavaScript) — types checked during execution
+
+Our Pascal interpreter is moving toward a static approach — you must declare variables before using them.
+
+### What the Semantic Analyzer Checks
+
+Two specific semantic rules are enforced:
+
+**1. Undeclared identifiers** — using a variable that was never declared in a `VAR` block:
+
+```pascal
+PROGRAM Test;
+VAR x : INTEGER;
+BEGIN
+    x := y + 1    { Error: Symbol(identifier) not found 'y' }
+END.
+```
+
+The analyzer walks the AST, and when it visits a `Var` node, it looks up the name in the symbol table. If it's not there, the program is rejected before it ever runs.
+
+**2. Duplicate declarations** — declaring the same variable twice:
+
+```pascal
+PROGRAM Test;
+VAR
+    x : INTEGER;
+    x : REAL;       { Error: Duplicate identifier 'x' found }
+BEGIN
+    x := 1
+END.
+```
+
+When `visit_VarDecl` tries to insert a symbol, it first checks if the name already exists.
+
+### Decidability and the Halting Problem
+
+Static analysis is fundamentally limited by **Rice's theorem** — you cannot statically determine all properties of a program's runtime behavior. For example, you can check "is this variable declared?" statically, but you cannot check "will this program ever divide by zero?" in all cases (that would require solving the **halting problem**).
+
+This is why languages split their checks: easy things (declarations, types) are checked statically, hard things (bounds, null pointers, termination) are checked dynamically or not at all.
+
+### The Symbol Table as a Formal Environment
+
+The `SymbolTable` is now a proper data structure with `insert()` and `lookup()` operations. In formal terms, it implements an **environment** — a partial function from names to their properties:
+
+```
+Γ : Name → Symbol
+```
+
+This is the same Γ (gamma) notation used in **type judgments** in formal type theory:
+
+```
+Γ ⊢ x : INTEGER
+```
+
+This reads: "in environment Γ, the identifier x has type INTEGER." Our `lookup('x')` does exactly this — it checks what type (if any) is associated with `x` in the current environment.
+
+### Limitation: No Nested Scopes Yet
+
+Right now there's one flat symbol table. This means a variable `a` declared inside a procedure collides with `a` declared in the main program — even though Pascal allows this (they're in different scopes). Part 14 fixes this with **scoped symbol tables** that chain together, implementing **lexical scoping** — one of the most important concepts in programming language theory.

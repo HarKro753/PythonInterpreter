@@ -4,7 +4,6 @@ VAR
 
 PROCEDURE P1;
 VAR
-    a : REAL;
     k : INTEGER;
 BEGIN {P1}
     k := 42

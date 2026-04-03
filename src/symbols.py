@@ -14,7 +14,11 @@ class BuiltinTypeSymbol(Symbol):
     def __str__(self):
         return self.name
 
-    __repr__ = __str__
+    def __repr__(self):
+        return "<{class_name}(name='{name}')>".format(
+            class_name=self.__class__.__name__,
+            name=self.name,
+        )
 
 
 class VarSymbol(Symbol):
@@ -22,7 +26,11 @@ class VarSymbol(Symbol):
         super().__init__(name, type)
 
     def __str__(self):
-        return '<{name}:{type}>'.format(name=self.name, type=self.type)
+        return "<{class_name}(name='{name}', type='{type}')>".format(
+            class_name=self.__class__.__name__,
+            name=self.name,
+            type=self.type,
+        )
 
     __repr__ = __str__
 
@@ -33,9 +41,10 @@ class ProcedureSymbol(Symbol):
         self.params = params if params is not None else []
 
     def __str__(self):
-        return '<{name}:{params}>'.format(
+        return "<{class_name}(name='{name}', parameters={params})>".format(
+            class_name=self.__class__.__name__,
             name=self.name,
-            params=self.params
+            params=self.params,
         )
 
     __repr__ = __str__
@@ -47,17 +56,22 @@ class SymbolTable(object):
         self._init_builtins()
 
     def _init_builtins(self):
-        self.define(BuiltinTypeSymbol('INTEGER'))
-        self.define(BuiltinTypeSymbol('REAL'))
+        self.insert(BuiltinTypeSymbol('INTEGER'))
+        self.insert(BuiltinTypeSymbol('REAL'))
 
     def __str__(self):
-        return 'Symbols: {symbols}'.format(
-            symbols=[value for value in self._symbols.values()]
+        symtab_header = 'Symbol table contents'
+        lines = ['\n', symtab_header, '_' * len(symtab_header)]
+        lines.extend(
+            ('%7s: %r' % (key, value))
+            for key, value in self._symbols.items()
         )
+        lines.append('\n')
+        return '\n'.join(lines)
 
     __repr__ = __str__
 
-    def define(self, symbol):
+    def insert(self, symbol):
         self._symbols[symbol.name] = symbol
 
     def lookup(self, name):

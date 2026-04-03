@@ -2,7 +2,7 @@ from symbols import SymbolTable, VarSymbol, ProcedureSymbol
 from interpreter import NodeVisitor
 
 
-class SymbolTableBuilder(NodeVisitor):
+class SemanticAnalyzer(NodeVisitor):
     def __init__(self):
         self.symtab = SymbolTable()
 
@@ -17,14 +17,21 @@ class SymbolTableBuilder(NodeVisitor):
     def visit_VarDecl(self, node):
         type_name = node.type_node.value
         type_symbol = self.symtab.lookup(type_name)
+
         var_name = node.var_node.value
+
+        if self.symtab.lookup(var_name) is not None:
+            raise Exception(
+                "Error: Duplicate identifier '%s' found" % var_name
+            )
+
         var_symbol = VarSymbol(var_name, type_symbol)
-        self.symtab.define(var_symbol)
+        self.symtab.insert(var_symbol)
 
     def visit_ProcedureDecl(self, node):
         proc_name = node.proc_name
         proc_symbol = ProcedureSymbol(proc_name)
-        self.symtab.define(proc_symbol)
+        self.symtab.insert(proc_symbol)
         self.visit(node.block_node)
 
     def visit_Compound(self, node):
@@ -32,17 +39,16 @@ class SymbolTableBuilder(NodeVisitor):
             self.visit(child)
 
     def visit_Assign(self, node):
-        var_name = node.left.value
-        var_symbol = self.symtab.lookup(var_name)
-        if var_symbol is None:
-            raise NameError(repr(var_name))
         self.visit(node.right)
+        self.visit(node.left)
 
     def visit_Var(self, node):
         var_name = node.value
         var_symbol = self.symtab.lookup(var_name)
         if var_symbol is None:
-            raise NameError(repr(var_name))
+            raise Exception(
+                "Error: Symbol(identifier) not found '%s'" % var_name
+            )
 
     def visit_BinOp(self, node):
         self.visit(node.left)

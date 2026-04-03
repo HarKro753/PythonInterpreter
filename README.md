@@ -83,7 +83,7 @@ python3 src/main.py
 - [x] Part 10 — Complete Pascal programs
 - [x] Part 11 — Symbol table management
 - [x] Part 12 — Procedure declarations
-- [ ] Part 13 — Semantic analysis
+- [x] Part 13 — Semantic analysis
 - [ ] Part 14 — Nested scopes, source-to-source compiler
 - [ ] Part 15 — Improved error reporting
 - [ ] Part 16 — Recognizing procedure calls

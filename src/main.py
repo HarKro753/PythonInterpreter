@@ -1,7 +1,7 @@
 import sys
 from lexer import Lexer
 from parser import Parser
-from semantic_analyzer import SymbolTableBuilder
+from semantic_analyzer import SemanticAnalyzer
 from interpreter import Interpreter
 
 
@@ -10,8 +10,8 @@ def run(text):
     parser = Parser(lexer)
     tree = parser.parse()
 
-    symtab_builder = SymbolTableBuilder()
-    symtab_builder.visit(tree)
+    semantic_analyzer = SemanticAnalyzer()
+    semantic_analyzer.visit(tree)
 
     interpreter = Interpreter(tree)
     result = interpreter.interpret()
