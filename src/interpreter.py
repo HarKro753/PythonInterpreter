@@ -1,4 +1,4 @@
-from tokens import PLUS, MINUS, MUL, DIV
+from tokens import PLUS, MINUS, MUL, FLOAT_DIV, INTEGER_DIV
 
 
 class NodeVisitor(object):
@@ -16,6 +16,20 @@ class Interpreter(NodeVisitor):
         self.parser = parser
         self.GLOBAL_SCOPE = {}
 
+    def visit_Program(self, node):
+        self.visit(node.block)
+
+    def visit_Block(self, node):
+        for declaration in node.declarations:
+            self.visit(declaration)
+        self.visit(node.compound_statement)
+
+    def visit_VarDecl(self, node):
+        pass
+
+    def visit_Type(self, node):
+        pass
+
     def visit_BinOp(self, node):
         if node.op.type == PLUS:
             return self.visit(node.left) + self.visit(node.right)
@@ -23,8 +37,10 @@ class Interpreter(NodeVisitor):
             return self.visit(node.left) - self.visit(node.right)
         elif node.op.type == MUL:
             return self.visit(node.left) * self.visit(node.right)
-        elif node.op.type == DIV:
+        elif node.op.type == INTEGER_DIV:
             return self.visit(node.left) // self.visit(node.right)
+        elif node.op.type == FLOAT_DIV:
+            return float(self.visit(node.left)) / float(self.visit(node.right))
 
     def visit_UnaryOp(self, node):
         if node.op.type == PLUS:
