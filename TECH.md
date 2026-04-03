@@ -219,7 +219,7 @@ State: {}
 
 ## Part 13 — Static Analysis: Catching Errors Before Execution
 
-This part introduces the most important new theoretical concept since ASTs: **static semantic analysis**. The interpreter now has a phase that checks the program for errors *without running it*.
+This part introduces the most important new theoretical concept since ASTs: **static semantic analysis**. The interpreter now has a phase that checks the program for errors _without running it_.
 
 ### The Multi-Pass Architecture
 
@@ -237,10 +237,11 @@ The AST is traversed **twice** by two different visitors. The semantic analyzer 
 
 This is a fundamental distinction in computer science:
 
-- **Static analysis** — examining the program *without executing it*. Our `SemanticAnalyzer` does this. It reads declarations, builds a symbol table, and checks that every variable used is declared. All of this happens at "compile time" (before execution).
-- **Dynamic analysis** — checking things *during execution*. Our `Interpreter` does this. Division by zero, for example, can only be caught at runtime.
+- **Static analysis** — examining the program _without executing it_. Our `SemanticAnalyzer` does this. It reads declarations, builds a symbol table, and checks that every variable used is declared. All of this happens at "compile time" (before execution).
+- **Dynamic analysis** — checking things _during execution_. Our `Interpreter` does this. Division by zero, for example, can only be caught at runtime.
 
 In type theory, this maps to:
+
 - **Static type systems** (Java, C, Rust) — types checked before execution
 - **Dynamic type systems** (Python, JavaScript) — types checked during execution
 
@@ -301,3 +302,129 @@ This reads: "in environment Γ, the identifier x has type INTEGER." Our `lookup(
 ### Limitation: No Nested Scopes Yet
 
 Right now there's one flat symbol table. This means a variable `a` declared inside a procedure collides with `a` declared in the main program — even though Pascal allows this (they're in different scopes). Part 14 fixes this with **scoped symbol tables** that chain together, implementing **lexical scoping** — one of the most important concepts in programming language theory.
+
+## Parts 14–18 — Nested Scopes, Procedure Calls, and the Call Stack
+
+These five parts complete the interpreter. We now have nested scopes, proper error reporting with line/column numbers, and full procedure call execution with a call stack.
+
+### Part 14: Lexical Scoping and the Scope Chain
+
+The flat `SymbolTable` is replaced by `ScopedSymbolTable` — each scope has a name, level, and a pointer to its **enclosing scope**. When looking up a name, we first check the current scope, then walk up the chain:
+
+```
+Procedure scope (level 2)  →  Global scope (level 1)  →  None
+      a, b (params)                x, y (globals)
+```
+
+This is **lexical scoping** (also called static scoping) — the scope of a name is determined by where it appears in the source code, not by the runtime call sequence. This was introduced by **Algol 60** and is used by almost every modern language.
+
+In the **lambda calculus**, this corresponds to the concept of **free and bound variables**. A variable is **bound** if it's defined in the current scope (a parameter or local), and **free** if it must be resolved from an enclosing scope. The `lookup()` method with `current_scope_only=False` implements exactly this: search locally first, then look outward for free variables.
+
+The `current_scope_only=True` flag is used for duplicate detection — you can have `a` in the global scope AND `a` in a procedure scope, because they're different bindings. But two `a`s in the same scope is an error.
+
+### Part 15: Error Reporting and Source Location Tracking
+
+Tokens now carry `lineno` and `column` fields, set by the lexer as it scans. Errors include three custom exception classes:
+
+```
+LexerError    — invalid character (e.g., '@')
+ParserError   — unexpected token (e.g., missing semicolon)
+SemanticError — identifier not found, duplicate id
+```
+
+Each error reports the exact source position:
+
+```
+SemanticError: Identifier not found -> Token(ID, 'y', position=4:10)
+```
+
+This connects to the concept of **error recovery** in compiler theory. Our interpreter uses the simplest strategy — **panic mode** — it stops at the first error. Real compilers try to recover and report multiple errors in one pass.
+
+### Part 16: Procedure Calls — New Grammar Rules
+
+The parser now distinguishes between assignments (`x := 5`) and procedure calls (`Alpha(3, 7)`) by peeking at the character after the identifier. If it's `(`, it's a call. This is a form of **LL(2) lookahead** — we need to see two tokens ahead (the ID and the LPAREN) to decide which rule to apply.
+
+New AST nodes:
+
+- `Param` — a formal parameter in a procedure declaration (`a : INTEGER`)
+- `ProcedureCall` — a call site with actual parameters (`Alpha(3, 7)`)
+
+The `ProcedureCall` node has a `proc_symbol` field that gets filled in by the semantic analyzer — this is a form of **name resolution** where the analyzer links the call to its declaration.
+
+### Part 17: The Call Stack and Activation Records
+
+The `GLOBAL_SCOPE` dictionary is replaced by a proper **call stack** with **activation records** (also called **stack frames**). This is how real computers manage function calls.
+
+```
+┌─────────────────────────┐
+│ AR: Alpha (level 2)     │  ← top (current)
+│   a = 3                 │
+│   b = 7                 │
+│   z = ?                 │
+├─────────────────────────┤
+│ AR: PROGRAM (level 1)   │
+│   x = 10               │
+│   y = ?                 │
+└─────────────────────────┘
+```
+
+Each procedure call **pushes** a new activation record. When the procedure returns, it **pops** the record. This is a **LIFO (Last In, First Out) stack** — the same data structure used by CPU hardware for function calls.
+
+In theoretical CS, the call stack is what gives us **pushdown automata** — automata with a stack. This is the computational model that corresponds to **context-free languages** in the Chomsky hierarchy. The call stack is literally the "push-down" part.
+
+### Part 18: Executing Procedure Calls — The Complete Algorithm
+
+The five-step execution of a procedure call:
+
+```
+1. Create a new ActivationRecord for the procedure
+2. Evaluate actual parameters, store in AR under formal parameter names
+3. Push AR onto the call stack
+4. Execute the procedure body (visit the block AST)
+5. Pop AR from the call stack
+```
+
+This maps directly to how real CPUs execute function calls:
+
+```
+1. Allocate stack frame
+2. Pass arguments (registers or stack)
+3. Jump to function code
+4. Execute function body
+5. Restore stack frame, return
+```
+
+### Formal Semantics: Big-Step Operational Semantics
+
+The procedure call mechanism implements what formal semantics calls a **big-step rule** for procedure invocation:
+
+```
+Γ ⊢ proc(a₁, a₂, ...) ⇓ result
+
+  where:
+    - look up proc in Γ to get formal params (p₁, p₂, ...) and body B
+    - evaluate each aᵢ to get values vᵢ
+    - extend Γ with {p₁ → v₁, p₂ → v₂, ...}
+    - evaluate B in the extended environment
+```
+
+Our code does exactly this: `node.proc_symbol` gives us the formal params and body, we evaluate actual params, create an extended environment (the AR), and execute the body.
+
+### The Complete Pipeline
+
+The final interpreter architecture:
+
+```
+Source Code
+    ↓
+  Lexer          — characters → tokens (with line:column)
+    ↓
+  Parser         — tokens → AST (with Param, ProcedureCall nodes)
+    ↓
+  Semantic       — AST → checked AST (scoped symbol tables,
+  Analyzer         name resolution, proc_symbol linking)
+    ↓
+  Interpreter    — AST → execution (call stack with activation records)
+```
+
+This four-stage pipeline mirrors the architecture of real compilers and interpreters. The only stage a real compiler would add is **code generation** — translating the AST to machine code or bytecode instead of walking it directly.

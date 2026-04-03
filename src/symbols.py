@@ -36,32 +36,45 @@ class VarSymbol(Symbol):
 
 
 class ProcedureSymbol(Symbol):
-    def __init__(self, name, params=None):
+    def __init__(self, name, formal_params=None):
         super().__init__(name)
-        self.params = params if params is not None else []
+        self.formal_params = formal_params if formal_params is not None else []
+        self.block_ast = None  # set by semantic analyzer
 
     def __str__(self):
         return "<{class_name}(name='{name}', parameters={params})>".format(
             class_name=self.__class__.__name__,
             name=self.name,
-            params=self.params,
+            params=self.formal_params,
         )
 
     __repr__ = __str__
 
 
-class SymbolTable(object):
-    def __init__(self):
+class ScopedSymbolTable(object):
+    def __init__(self, scope_name, scope_level, enclosing_scope=None):
         self._symbols = OrderedDict()
-        self._init_builtins()
+        self.scope_name = scope_name
+        self.scope_level = scope_level
+        self.enclosing_scope = enclosing_scope
 
     def _init_builtins(self):
         self.insert(BuiltinTypeSymbol('INTEGER'))
         self.insert(BuiltinTypeSymbol('REAL'))
 
     def __str__(self):
-        symtab_header = 'Symbol table contents'
-        lines = ['\n', symtab_header, '_' * len(symtab_header)]
+        h1 = 'SCOPE (SCOPED SYMBOL TABLE)'
+        lines = ['\n', h1, '=' * len(h1)]
+        for header_name, header_value in (
+            ('Scope name', self.scope_name),
+            ('Scope level', self.scope_level),
+            ('Enclosing scope',
+             self.enclosing_scope.scope_name if self.enclosing_scope else None
+            ),
+        ):
+            lines.append('%-15s: %s' % (header_name, header_value))
+        h2 = 'Scope (Scoped symbol table) contents'
+        lines.extend([h2, '-' * len(h2)])
         lines.extend(
             ('%7s: %r' % (key, value))
             for key, value in self._symbols.items()
@@ -74,6 +87,16 @@ class SymbolTable(object):
     def insert(self, symbol):
         self._symbols[symbol.name] = symbol
 
-    def lookup(self, name):
+    def lookup(self, name, current_scope_only=False):
         symbol = self._symbols.get(name)
-        return symbol
+
+        if symbol is not None:
+            return symbol
+
+        if current_scope_only:
+            return None
+
+        if self.enclosing_scope is not None:
+            return self.enclosing_scope.lookup(name)
+
+        return None

@@ -12,14 +12,18 @@ PROGRAM, VAR, PROCEDURE, INTEGER, REAL, COLON, COMMA = (
 
 
 class Token(object):
-    def __init__(self, type, value):
+    def __init__(self, type, value, lineno=None, column=None):
         self.type = type
         self.value = value
+        self.lineno = lineno
+        self.column = column
 
     def __str__(self):
-        return 'Token({type}, {value})'.format(
+        return 'Token({type}, {value}, position={lineno}:{column})'.format(
             type=self.type,
-            value=repr(self.value)
+            value=repr(self.value),
+            lineno=self.lineno,
+            column=self.column,
         )
 
     def __repr__(self):

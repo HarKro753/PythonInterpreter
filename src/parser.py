@@ -4,9 +4,10 @@ from tokens import (
     PROGRAM, VAR, PROCEDURE, INTEGER, REAL, COLON, COMMA
 )
 from ast_nodes import (
-    Program, Block, VarDecl, ProcedureDecl, Type, BinOp, UnaryOp, Num,
-    Compound, Assign, Var, NoOp
+    Program, Block, VarDecl, ProcedureDecl, ProcedureCall, Param, Type,
+    BinOp, UnaryOp, Num, Compound, Assign, Var, NoOp
 )
+from errors import ParserError, ErrorCode
 
 
 class Parser(object):
@@ -14,14 +15,21 @@ class Parser(object):
         self.lexer = lexer
         self.current_token = self.lexer.get_next_token()
 
-    def error(self):
-        raise Exception('Invalid syntax')
+    def error(self, error_code, token):
+        raise ParserError(
+            error_code=error_code,
+            token=token,
+            message='{} -> {}'.format(error_code.value, token),
+        )
 
     def eat(self, token_type):
         if self.current_token.type == token_type:
             self.current_token = self.lexer.get_next_token()
         else:
-            self.error()
+            self.error(
+                error_code=ErrorCode.UNEXPECTED_TOKEN,
+                token=self.current_token,
+            )
 
     def program(self):
         """program : PROGRAM variable SEMI block DOT"""
@@ -40,8 +48,8 @@ class Parser(object):
         return Block(declaration_nodes, compound_statement_node)
 
     def declarations(self):
-        """declarations : VAR (variable_declaration SEMI)+
-                        | (PROCEDURE ID SEMI block SEMI)*
+        """declarations : (VAR (variable_declaration SEMI)+)*
+                        | (PROCEDURE ID (LPAREN formal_parameter_list RPAREN)? SEMI block SEMI)*
                         | empty
         """
         declarations = []
@@ -57,13 +65,47 @@ class Parser(object):
             self.eat(PROCEDURE)
             proc_name = self.current_token.value
             self.eat(ID)
+            params = []
+
+            if self.current_token.type == LPAREN:
+                self.eat(LPAREN)
+                params = self.formal_parameter_list()
+                self.eat(RPAREN)
+
             self.eat(SEMI)
             block_node = self.block()
-            proc_decl = ProcedureDecl(proc_name, block_node)
+            proc_decl = ProcedureDecl(proc_name, params, block_node)
             declarations.append(proc_decl)
             self.eat(SEMI)
 
         return declarations
+
+    def formal_parameter_list(self):
+        """formal_parameter_list : formal_parameters
+                                 | formal_parameters SEMI formal_parameter_list
+        """
+        params = self.formal_parameters()
+
+        while self.current_token.type == SEMI:
+            self.eat(SEMI)
+            params.extend(self.formal_parameters())
+
+        return params
+
+    def formal_parameters(self):
+        """formal_parameters : ID (COMMA ID)* COLON type_spec"""
+        param_tokens = [self.current_token]
+        self.eat(ID)
+
+        while self.current_token.type == COMMA:
+            self.eat(COMMA)
+            param_tokens.append(self.current_token)
+            self.eat(ID)
+
+        self.eat(COLON)
+        type_node = self.type_spec()
+
+        return [Param(Var(token), type_node) for token in param_tokens]
 
     def variable_declaration(self):
         """variable_declaration : ID (COMMA ID)* COLON type_spec"""
@@ -109,20 +151,42 @@ class Parser(object):
             self.eat(SEMI)
             results.append(self.statement())
 
-        if self.current_token.type == ID:
-            self.error()
-
         return results
 
     def statement(self):
-        """statement : compound_statement | assignment_statement | empty"""
+        """statement : compound_statement | proccall_statement | assignment_statement | empty"""
         if self.current_token.type == BEGIN:
             node = self.compound_statement()
+        elif self.current_token.type == ID and self.lexer.current_char == '(':
+            node = self.proccall_statement()
         elif self.current_token.type == ID:
             node = self.assignment_statement()
         else:
             node = self.empty()
         return node
+
+    def proccall_statement(self):
+        """proccall_statement : ID LPAREN (expr (COMMA expr)*)? RPAREN"""
+        token = self.current_token
+        proc_name = self.current_token.value
+        self.eat(ID)
+        self.eat(LPAREN)
+
+        actual_params = []
+        if self.current_token.type != RPAREN:
+            actual_params.append(self.expr())
+
+        while self.current_token.type == COMMA:
+            self.eat(COMMA)
+            actual_params.append(self.expr())
+
+        self.eat(RPAREN)
+
+        return ProcedureCall(
+            proc_name=proc_name,
+            actual_params=actual_params,
+            token=token,
+        )
 
     def assignment_statement(self):
         """assignment_statement : variable ASSIGN expr"""
@@ -198,5 +262,8 @@ class Parser(object):
     def parse(self):
         node = self.program()
         if self.current_token.type != EOF:
-            self.error()
+            self.error(
+                error_code=ErrorCode.UNEXPECTED_TOKEN,
+                token=self.current_token,
+            )
         return node

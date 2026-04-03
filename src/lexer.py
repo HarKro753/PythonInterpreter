@@ -3,6 +3,7 @@ from tokens import (
     LPAREN, RPAREN, EOF, DOT, ASSIGN, SEMI, ID, COLON, COMMA,
     RESERVED_KEYWORDS
 )
+from errors import LexerError
 
 
 class Lexer(object):
@@ -10,16 +11,27 @@ class Lexer(object):
         self.text = text
         self.pos = 0
         self.current_char = self.text[self.pos]
+        self.lineno = 1
+        self.column = 1
 
     def error(self):
-        raise Exception('Invalid character')
+        raise LexerError(
+            message="Lexer error on '{}' line: {} column: {}".format(
+                self.current_char, self.lineno, self.column
+            )
+        )
 
     def advance(self):
+        if self.current_char == '\n':
+            self.lineno += 1
+            self.column = 0
+
         self.pos += 1
         if self.pos > len(self.text) - 1:
             self.current_char = None
         else:
             self.current_char = self.text[self.pos]
+            self.column += 1
 
     def peek(self):
         peek_pos = self.pos + 1
@@ -34,9 +46,10 @@ class Lexer(object):
     def skip_comment(self):
         while self.current_char != '}':
             self.advance()
-        self.advance()  # skip closing brace
+        self.advance()
 
     def number(self):
+        token = Token(type=None, value=None, lineno=self.lineno, column=self.column)
         result = ''
         while self.current_char is not None and self.current_char.isdigit():
             result += self.current_char
@@ -48,17 +61,29 @@ class Lexer(object):
             while self.current_char is not None and self.current_char.isdigit():
                 result += self.current_char
                 self.advance()
-            return Token(REAL_CONST, float(result))
+            token.type = REAL_CONST
+            token.value = float(result)
+        else:
+            token.type = INTEGER_CONST
+            token.value = int(result)
 
-        return Token(INTEGER_CONST, int(result))
+        return token
 
     def _id(self):
+        token = Token(type=None, value=None, lineno=self.lineno, column=self.column)
         result = ''
-        while self.current_char is not None and self.current_char.isalnum() or self.current_char == '_':
+        while self.current_char is not None and (self.current_char.isalnum() or self.current_char == '_'):
             result += self.current_char
             self.advance()
 
-        token = RESERVED_KEYWORDS.get(result.upper(), Token(ID, result))
+        reserved = RESERVED_KEYWORDS.get(result.upper())
+        if reserved is not None:
+            token.type = reserved.type
+            token.value = reserved.value
+        else:
+            token.type = ID
+            token.value = result
+
         return token
 
     def get_next_token(self):
@@ -80,50 +105,61 @@ class Lexer(object):
                 return self.number()
 
             if self.current_char == ':' and self.peek() == '=':
+                token = Token(ASSIGN, ':=', self.lineno, self.column)
                 self.advance()
                 self.advance()
-                return Token(ASSIGN, ':=')
+                return token
 
             if self.current_char == ':':
+                token = Token(COLON, ':', self.lineno, self.column)
                 self.advance()
-                return Token(COLON, ':')
+                return token
 
             if self.current_char == ',':
+                token = Token(COMMA, ',', self.lineno, self.column)
                 self.advance()
-                return Token(COMMA, ',')
+                return token
 
             if self.current_char == ';':
+                token = Token(SEMI, ';', self.lineno, self.column)
                 self.advance()
-                return Token(SEMI, ';')
+                return token
 
             if self.current_char == '.':
+                token = Token(DOT, '.', self.lineno, self.column)
                 self.advance()
-                return Token(DOT, '.')
+                return token
 
             if self.current_char == '+':
+                token = Token(PLUS, '+', self.lineno, self.column)
                 self.advance()
-                return Token(PLUS, '+')
+                return token
 
             if self.current_char == '-':
+                token = Token(MINUS, '-', self.lineno, self.column)
                 self.advance()
-                return Token(MINUS, '-')
+                return token
 
             if self.current_char == '*':
+                token = Token(MUL, '*', self.lineno, self.column)
                 self.advance()
-                return Token(MUL, '*')
+                return token
 
             if self.current_char == '/':
+                token = Token(FLOAT_DIV, '/', self.lineno, self.column)
                 self.advance()
-                return Token(FLOAT_DIV, '/')
+                return token
 
             if self.current_char == '(':
+                token = Token(LPAREN, '(', self.lineno, self.column)
                 self.advance()
-                return Token(LPAREN, '(')
+                return token
 
             if self.current_char == ')':
+                token = Token(RPAREN, ')', self.lineno, self.column)
                 self.advance()
-                return Token(RPAREN, ')')
+                return token
 
             self.error()
 
-        return Token(EOF, None)
+        return Token(EOF, None, self.lineno, self.column)

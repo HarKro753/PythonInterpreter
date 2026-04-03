@@ -84,11 +84,11 @@ python3 src/main.py
 - [x] Part 11 — Symbol table management
 - [x] Part 12 — Procedure declarations
 - [x] Part 13 — Semantic analysis
-- [ ] Part 14 — Nested scopes, source-to-source compiler
-- [ ] Part 15 — Improved error reporting
-- [ ] Part 16 — Recognizing procedure calls
-- [ ] Part 17 — Call stack and activation records
-- [ ] Part 18 — Executing procedure calls
+- [x] Part 14 — Nested scopes, source-to-source compiler
+- [x] Part 15 — Improved error reporting
+- [x] Part 16 — Recognizing procedure calls
+- [x] Part 17 — Call stack and activation records
+- [x] Part 18 — Executing procedure calls
 
 ## 📖 Further Reading
 

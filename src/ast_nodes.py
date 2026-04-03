@@ -21,9 +21,24 @@ class VarDecl(AST):
 
 
 class ProcedureDecl(AST):
-    def __init__(self, proc_name, block_node):
+    def __init__(self, proc_name, params, block_node):
         self.proc_name = proc_name
+        self.params = params  # list of Param nodes
         self.block_node = block_node
+
+
+class ProcedureCall(AST):
+    def __init__(self, proc_name, actual_params, token):
+        self.proc_name = proc_name
+        self.actual_params = actual_params  # list of AST nodes
+        self.token = token
+        self.proc_symbol = None  # set by semantic analyzer
+
+
+class Param(AST):
+    def __init__(self, var_node, type_node):
+        self.var_node = var_node
+        self.type_node = type_node
 
 
 class Type(AST):

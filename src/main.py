@@ -14,8 +14,8 @@ def run(text):
     semantic_analyzer.visit(tree)
 
     interpreter = Interpreter(tree)
-    result = interpreter.interpret()
-    print(result)
+    interpreter.interpret()
+    print(interpreter.GLOBAL_SCOPE)
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
         run(text)
     else:
         print('Usage: python3 src/main.py <filename>')
-        print('Example: python3 src/main.py examples/section10.pas')
+        print('Example: python3 src/main.py examples/section18.pas')
 
 
 if __name__ == '__main__':
