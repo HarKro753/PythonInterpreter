@@ -100,3 +100,39 @@ The way the interpreter walks the tree (`visit_BinOp` calls `visit` on left and 
 ### Separation of Syntax and Semantics
 
 This is a fundamental distinction in formal language theory. The **parser** handles syntax (is the expression well-formed?), while the **interpreter** handles semantics (what does it mean?). By separating them, we could attach different semantics to the same syntax — a type checker, a compiler, a pretty-printer — all just different visitors walking the same tree.
+
+## Part 8 — The Visitor Pattern and Dynamic Dispatch
+
+`visit_UnaryOp()` looks like it's never called — there's no explicit call to it anywhere. The magic is in the `visit()` method:
+
+```python
+def visit(self, node):
+    method_name = 'visit_' + type(node).__name__
+    visitor = getattr(self, method_name, self.generic_visit)
+    return visitor(node)
+```
+
+It builds the method name **dynamically** from the node's class name. When `visit()` receives a `UnaryOp` node:
+
+1. `type(node).__name__` → `"UnaryOp"`
+2. `'visit_' + "UnaryOp"` → `"visit_UnaryOp"`
+3. `getattr(self, "visit_UnaryOp")` → finds the method
+4. Calls it
+
+### Example: `-3`
+
+```
+Parser builds:  UnaryOp(MINUS, Num(3))
+
+Interpreter:
+├─ interpret() calls self.visit(tree)
+├─ tree is a UnaryOp → visit() builds "visit_UnaryOp" → calls it
+├─ visit_UnaryOp sees MINUS, calls self.visit(node.expr)
+│   ├─ node.expr is a Num(3) → visit() builds "visit_Num" → calls it
+│   └─ visit_Num returns 3
+└─ visit_UnaryOp returns -3
+```
+
+This is the **visitor pattern** — instead of using `if/elif` to check node types, it uses Python's `getattr()` to dispatch automatically. The benefit: when we add a new node type, we just add a `visit_NewType` method and it works. No need to touch `visit()` itself.
+
+This relates to **dynamic dispatch** and the **open/closed principle** — the system is open for extension (new node types) but closed for modification (the `visit()` method never changes).

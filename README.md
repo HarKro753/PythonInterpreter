@@ -78,7 +78,7 @@ python3 src/main.py
 - [x] Part 5 — Operator precedence and associativity
 - [x] Part 6 — Parenthesized expressions
 - [x] Part 7 — Abstract Syntax Trees (ASTs)
-- [ ] Part 8 — Unary operators
+- [x] Part 8 — Unary operators
 - [ ] Part 9 — Pascal compound statements, variables
 - [ ] Part 10 — Complete Pascal programs
 - [ ] Part 11 — Symbol table management

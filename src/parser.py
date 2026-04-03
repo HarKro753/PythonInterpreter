@@ -1,5 +1,5 @@
 from tokens import INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN
-from ast_nodes import BinOp, Num
+from ast_nodes import BinOp, UnaryOp, Num
 
 
 class Parser(object):
@@ -17,9 +17,15 @@ class Parser(object):
             self.error()
 
     def factor(self):
-        """factor : INTEGER | LPAREN expr RPAREN"""
+        """factor : (PLUS | MINUS) factor | INTEGER | LPAREN expr RPAREN"""
         token = self.current_token
-        if token.type == INTEGER:
+        if token.type == PLUS:
+            self.eat(PLUS)
+            return UnaryOp(token, self.factor())
+        elif token.type == MINUS:
+            self.eat(MINUS)
+            return UnaryOp(token, self.factor())
+        elif token.type == INTEGER:
             self.eat(INTEGER)
             return Num(token)
         elif token.type == LPAREN:
