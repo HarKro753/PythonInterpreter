@@ -75,8 +75,8 @@ python3 src/main.py
 - [x] Part 2 — Multi-digit integers, subtraction, whitespace
 - [x] Part 3 — Syntax diagrams, arbitrary-length +/- expressions
 - [x] Part 4 — Context-free grammars, multiplication and division
-- [ ] Part 5 — Operator precedence and associativity
-- [ ] Part 6 — Parenthesized expressions
+- [x] Part 5 — Operator precedence and associativity
+- [x] Part 6 — Parenthesized expressions
 - [ ] Part 7 — Abstract Syntax Trees (ASTs)
 - [ ] Part 8 — Unary operators
 - [ ] Part 9 — Pascal compound statements, variables
