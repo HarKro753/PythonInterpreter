@@ -32,10 +32,37 @@ expr() starts
 
 The deeper a function is in the call hierarchy, the higher its precedence. Simple `while` loops and `if/else` statements are all it takes to encode the "multiply before addition" rule.
 
-### Related Concepts
+### Related Concepts in Theoretical Computer Science
 
-- Context-Free Grammars (CFG) — Chomsky hierarchy Type 2
-- BNF (Backus-Naur Form) — notation for production rules
-- Recursive Descent Parsing — one function per grammar rule, top-down
-- Chomsky Hierarchy — our lexer is Type 3 (regular), our parser is Type 2 (context-free)
-- Dragon Book (Aho, Sethi, Ullman) — stratified grammars for operator precedence
+#### Context-Free Grammars (CFG)
+
+Our function hierarchy is a direct implementation of a CFG. The grammar rules we coded are called **production rules**:
+
+```
+expr   → term ((PLUS | MINUS) term)*
+term   → factor ((MUL | DIV) factor)*
+factor → INTEGER
+```
+
+This is the same notation (BNF — Backus-Naur Form) used to formally define programming languages.
+
+#### Recursive Descent Parsing
+
+Our approach — one function per grammar rule, calling each other top-down — is called a **recursive descent parser**. It's one of the simplest ways to implement a parser and maps 1:1 to the grammar. This falls under **top-down parsing** in the Chomsky hierarchy.
+
+#### The Chomsky Hierarchy
+
+Our grammar sits at **Type 2 (context-free)** in Chomsky's hierarchy:
+
+```
+Type 0 — Unrestricted (Turing machines)
+Type 1 — Context-sensitive
+Type 2 — Context-free ← our parser is here
+Type 3 — Regular       ← our lexer is here (finite automaton)
+```
+
+The lexer (tokenizer) operates at Type 3 — it's essentially a finite automaton recognizing patterns like digits and operators. The parser operates at Type 2 — it needs a stack (the call stack!) to handle nested structures, which is exactly why parentheses in Part 6 will work through recursion.
+
+#### Operator Precedence via Stratified Grammars
+
+In formal terms, precedence is encoded by **stratifying the grammar into levels**. Each level of production rules corresponds to a precedence level. This is a standard technique in compiler theory — straight out of the "Dragon Book" (Aho, Sethi, Ullman).
