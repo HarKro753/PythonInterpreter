@@ -71,7 +71,7 @@ python3 interpreter.py
 ## 🗺️ Roadmap
 
 - [x] Part 1 — Single-digit addition
-- [ ] Part 2 — Multi-digit integers, subtraction, whitespace
+- [x] Part 2 — Multi-digit integers, subtraction, whitespace
 - [ ] Part 3 — Syntax diagrams, arbitrary-length +/- expressions
 - [ ] Part 4 — Context-free grammars, multiplication and division
 - [ ] Part 5 — Operator precedence and associativity

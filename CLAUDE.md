@@ -6,6 +6,7 @@ Building a simple Pascal interpreter from scratch in Python, following Ruslan Sp
 ## Current Progress
 
 - Part 1: Complete
+- Part 2: Complete
 
 ## Tutorial Parts
 
