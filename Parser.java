@@ -2,7 +2,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Parser {
-    
+
     interface Node {}
 
     static class NumberNode implements Node {
@@ -50,21 +50,25 @@ public class Parser {
         }
     }
 
-    // ── Parser ──
     // Grammar:
     //   expr   : term ((PLUS|MINUS) term)*
     //   term   : factor ((MUL|DIV) factor)*
     //   factor : INT|FLOAT | (PLUS|MINUS) factor | LPAREN expr RPAREN
 
     List<Lexer.Token> tokens;
+    String text;
     int pos;
 
-    Parser(List<Lexer.Token> tokens) {
+    Parser(List<Lexer.Token> tokens, String text) {
         this.tokens = tokens;
+        this.text = text;
         this.pos = 0;
     }
 
     Lexer.Token current() {
+        if (pos >= tokens.size()) {
+            throw new LangError(text, text.length(), "Unerwartetes Ende der Eingabe");
+        }
         return tokens.get(pos);
     }
 
@@ -85,13 +89,13 @@ public class Parser {
             advance();
             Node result = expr();
             if (current().type != Lexer.TokenType.RParen) {
-                throw new Exception("Erwarte ')'");
+                throw new LangError(text, current().pos, "Erwarte ')'");
             }
             advance();
             return result;
         }
 
-        throw new Exception("Unerwartetes Token: " + tok);
+        throw new LangError(text, tok.pos, "Unerwartetes Token: " + tok);
     }
 
     Node term() throws Exception {
@@ -125,11 +129,14 @@ public class Parser {
             if (text.trim().isEmpty()) continue;
             try {
                 List<Lexer.Token> tokens = Lexer.lexer(text);
-                Parser parser = new Parser(tokens);
+                Parser parser = new Parser(tokens, text);
                 Node ast = parser.expr();
+                if (parser.current().type != Lexer.TokenType.EOF) {
+                    throw new LangError(text, parser.current().pos, "Unerwartetes Token nach Ausdruck: " + parser.current());
+                }
                 System.out.println(ast);
-            } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
+            } catch (LangError e) {
+                System.out.println("Error: " + e);
             }
         }
         scanner.close();
