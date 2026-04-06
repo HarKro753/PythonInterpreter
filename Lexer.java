@@ -1,11 +1,10 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class Lexer {
 
     enum TokenType {
-        Plus, Minus, Mul, Div, Int, Float
+        Plus, Minus, Mul, Div, Int, Float, LParen, RParen, EOF
     }
 
     static class Token {
@@ -48,6 +47,12 @@ public class Lexer {
             } else if (ch == '/') {
                 tokens.add(new Token(TokenType.Div));
                 i++;
+            } else if (ch == '(') {
+                tokens.add(new Token(TokenType.LParen));
+                i++;
+            } else if (ch == ')') {
+                tokens.add(new Token(TokenType.RParen));
+                i++;
             } else if (Character.isDigit(ch) || ch == '.') {
                 StringBuilder num = new StringBuilder();
                 int dots = 0;
@@ -70,23 +75,7 @@ public class Lexer {
                 throw new Exception("Unbekanntes Zeichen: " + ch);
             }
         }
+        tokens.add(new Token(TokenType.EOF));
         return tokens;
-    }
-
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        while (true) {
-            System.out.print("lexer> ");
-            if (!scanner.hasNextLine()) break;
-            String text = scanner.nextLine();
-            if (text.trim().isEmpty()) continue;
-            try {
-                List<Token> result = lexer(text);
-                System.out.println(result);
-            } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
-            }
-        }
-        scanner.close();
     }
 }
