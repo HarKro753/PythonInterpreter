@@ -1,5 +1,4 @@
 import java.util.List;
-import java.util.Scanner;
 
 public class Parser {
 
@@ -120,25 +119,4 @@ public class Parser {
         return left;
     }
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        while (true) {
-            System.out.print("parser> ");
-            if (!scanner.hasNextLine()) break;
-            String text = scanner.nextLine();
-            if (text.trim().isEmpty()) continue;
-            try {
-                List<Lexer.Token> tokens = Lexer.lexer(text);
-                Parser parser = new Parser(tokens, text);
-                Node ast = parser.expr();
-                if (parser.current().type != Lexer.TokenType.EOF) {
-                    throw new LangError(text, parser.current().pos, "Unerwartetes Token nach Ausdruck: " + parser.current());
-                }
-                System.out.println(ast);
-            } catch (LangError e) {
-                System.out.println("Error: " + e);
-            }
-        }
-        scanner.close();
-    }
 }
